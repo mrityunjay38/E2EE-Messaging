@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "startt": "clear && nodemon server.js",
+    "start": "for processId in `lsof -ti:3001`; do kill -9 $processId; done && nodemon server.js"
   },
   "author": "Mrityunjay",
   "license": "ISC",
