@@ -25,13 +25,24 @@ app.use(cors());
 
 io.on("connection", (socket) => {
   const username = socket?.handshake?.auth?.username;
-  onlineUsers.push({ username });
+  const userInfo = { username, id: socket?.id };
+  onlineUsers.push(userInfo);
   io.sockets.emit("online_users", onlineUsers);
 
-  // socket.on("to_server_message", ({ message = "NA" }) => {
-  //   socket.broadcast.emit("client_message", { message });
-  // });
+  initSocketListeners(socket);
 });
+
+function initSocketListeners(socket) {
+  socket.on("to_user", ({ message, to, username }) => {
+    socket
+      .to(to)
+      .emit("on_message", {
+        message,
+        from: socket?.id,
+        username: socket?.handshake?.auth?.username,
+      });
+  });
+}
 
 server.listen(3001, () => {
   console.log("listening on *:3001");
