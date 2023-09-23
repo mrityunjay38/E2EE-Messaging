@@ -12,6 +12,8 @@ const io = new Server(server, {
   },
 });
 
+const onlineUsers = [];
+
 /* Start-Enable cors + set static frontend */
 app.use(cors());
 // app.use(express.static(path.join(__dirname, "../app/build")));
@@ -22,9 +24,13 @@ app.use(cors());
 // });
 
 io.on("connection", (socket) => {
-  socket.on("to_server_message", ({ message = "NA" }) => {
-    socket.broadcast.emit("client_message", { message });
-  });
+  const username = socket?.handshake?.auth?.username;
+  onlineUsers.push({ username });
+  io.sockets.emit("online_users", onlineUsers);
+
+  // socket.on("to_server_message", ({ message = "NA" }) => {
+  //   socket.broadcast.emit("client_message", { message });
+  // });
 });
 
 server.listen(3001, () => {
