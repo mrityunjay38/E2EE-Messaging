@@ -14,14 +14,9 @@ const io = new Server(server, {
 
 const onlineUsers = [];
 
-/* Start-Enable cors + set static frontend */
+/* Start-Enable cors */
 app.use(cors());
-// app.use(express.static(path.join(__dirname, "../app/build")));
-/* End-Enable cors + set static frontend */
-
-// app.get("/", (req, res) => {
-//   res.sendFile(__dirname, "../app/build" + "/index.html");
-// });
+/* End-Enable cors */
 
 io.on("connection", (socket) => {
   const username = socket?.handshake?.auth?.username;
@@ -34,13 +29,11 @@ io.on("connection", (socket) => {
 
 function initSocketListeners(socket) {
   socket.on("to_user", ({ message, to, username }) => {
-    socket
-      .to(to)
-      .emit("on_message", {
-        message,
-        from: socket?.id,
-        username: socket?.handshake?.auth?.username,
-      });
+    socket.to(to).emit("on_message", {
+      message,
+      from: socket?.id,
+      username: username,
+    });
   });
 }
 
