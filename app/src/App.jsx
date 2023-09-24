@@ -23,7 +23,6 @@ function App() {
 
       socket.on("on_message", (data) => {
         handleNewMessage(data);
-        console.log("recieve", data);
       });
 
       socket.on("online_users", (users) => {
@@ -43,9 +42,6 @@ function App() {
           username: recipient?.username,
         });
         setInputMessage("");
-        console.log("send", {          message: target?.value,
-          to: recipient?.id,
-          username: recipient?.username,})
       }
     },
     [recipient, socket]
@@ -54,7 +50,6 @@ function App() {
   const handleRecipientChange = useCallback(
     ({ id, username }) =>
       (event) => {
-        console.log(id, username)
         setRecipient({ id, username });
       },
     [onlineUser]
@@ -83,7 +78,8 @@ function App() {
         {onlineUser?.map((user) => {
           return (
             <div onClick={handleRecipientChange(user)} key={user?.id}>
-              {user?.username}
+              <span className="online-icon" />
+              <span>{user?.username}</span>
             </div>
           );
         })}
