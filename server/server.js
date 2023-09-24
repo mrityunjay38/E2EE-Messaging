@@ -12,7 +12,7 @@ const io = new Server(server, {
   },
 });
 
-const onlineUsers = [];
+let onlineUsers = [];
 
 /* Start-Enable cors */
 app.use(cors());
@@ -34,6 +34,12 @@ function initSocketListeners(socket) {
       from: socket?.id,
       username: username,
     });
+  });
+
+  socket.on("disconnect", function () {
+    const user = onlineUsers?.findIndex((user) => user?.id === socket?.id);
+    onlineUsers?.splice(user, 1);
+    io.sockets.emit("online_users", onlineUsers);
   });
 }
 

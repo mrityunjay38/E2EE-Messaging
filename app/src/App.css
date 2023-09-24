@@ -20,6 +20,16 @@
 .online-users > div {
   padding: 0.5em;
   padding-bottom: 0;
+  display: flex;
+  place-items: center;
+}
+
+.online-users .online-icon {
+  width: 5px;
+  height: 5px;
+  background: lightgreen;
+  border-radius: 10px;
+  margin-right: 10px;
 }
 
 .message-list {
