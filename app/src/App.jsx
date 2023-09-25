@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
+import generateKey from "./GenerateKey/ecdsa";
 import { io } from "socket.io-client";
 const socket = io("ws://localhost:3001", { autoConnect: false });
+let publicKey, privateKey;
 
 function App() {
   const inputRef = useRef();
@@ -31,6 +33,17 @@ function App() {
     }
 
     return () => socket.disconnect();
+  }, [username]);
+
+  useEffect(() => {
+    if (username) {
+      generateKey()
+        .then((keyPair) => {
+          publicKey = keyPair?.publicKey;
+          privateKey = keyPair?.privateKey;
+        })
+        .catch((err) => err);
+    }
   }, [username]);
 
   const handleSendMessage = useCallback(
