@@ -3,10 +3,13 @@ import "./App.css";
 import { io } from "socket.io-client";
 import DiffiHellmanAlgo from "./EncryptDecrypt/diffieHellman";
 import { secret } from "./EncryptDecrypt/utils";
+import encrypt from "./EncryptDecrypt/encrypt";
+import decrypt from "./EncryptDecrypt/decrypt";
 const socket = io("ws://localhost:3001", { autoConnect: false });
-const privateKey = secret();
-const publicKey = DiffiHellmanAlgo(privateKey);
-console.log(publicKey, privateKey);
+const PRIVATE_KEY = secret();
+const PUBLIC_KEY = DiffiHellmanAlgo(PRIVATE_KEY);
+let SHARED_KEY;
+console.log(PUBLIC_KEY, PRIVATE_KEY);
 
 function App() {
   const [message, setMessage] = useState([]);
@@ -20,42 +23,15 @@ function App() {
     setUserName(newUser);
   }, []);
 
-  useEffect(() => {
-    if (username) {
-      socket.auth = { username: username, publicKey };
-      socket.connect();
-
-      socket.on("on_message", (data) => {
-        handleNewMessage(data);
-      });
-
-      socket.on("online_users", (users) => {
-        setOnlineUser(users?.filter((user) => user?.username !== username));
-      });
-    }
-
-    return () => socket.disconnect();
-  }, [username]);
-
-  // useEffect(() => {
-  //   if (username) {
-  //     generateKey()
-  //       .then((keyPair) => {
-  //         publicKey = keyPair?.publicKey;
-  //         privateKey = keyPair?.privateKey;
-  //       })
-  //       .catch((err) => err);
-  //   }
-  // }, [username]);
-
   const handleSendMessage = useCallback(
-    ({ key, target }) => {
+    async ({ key, target }) => {
       if (key === "Enter") {
+        const encryptedMessage = await encrypt(target?.value, SHARED_KEY);
         socket.emit("to_user", {
-          message: target?.value,
+          message: encryptedMessage,
           to: recipient?.id,
           username,
-          publicKey,
+          publicKey: PUBLIC_KEY,
         });
         setInputMessage("");
       }
@@ -67,22 +43,54 @@ function App() {
     ({ id, username, publicKey }) =>
       (event) => {
         setRecipient({ id, username, publicKey });
+        try {
+          SHARED_KEY = DiffiHellmanAlgo(publicKey, PRIVATE_KEY);
+        } catch (err) {
+          console.log(err);
+        }
       },
     [onlineUser]
   );
 
-  function handleNewMessage(data) {
-    const messageHistoryIndex = message?.findIndex(
-      (user) => user?.from === data?.from
-    );
-    const updatedMessage = [...message];
-    if (messageHistoryIndex > -1) {
-      updatedMessage[messageHistoryIndex].message.push(data?.message);
-    } else {
-      updatedMessage.push({ ...data, message: [data?.message] });
+  const handleNewMessage = useCallback(
+    async (data) => {
+      SHARED_KEY = DiffiHellmanAlgo(data?.publicKey, PRIVATE_KEY);
+      const decryptedMessage = await decrypt(data?.message, SHARED_KEY);
+
+      const updatedMessage = [...message];
+      const messageHistoryIndex = message?.findIndex(
+        (user) => user?.from === data?.from
+      );
+      console.log(messageHistoryIndex, message, data);
+      if (messageHistoryIndex > -1) {
+        updatedMessage[messageHistoryIndex].message.push(decryptedMessage);
+      } else {
+        updatedMessage.push({ ...data, message: [decryptedMessage] });
+      }
+      setMessage(updatedMessage);
+    },
+    [message]
+  );
+
+  useEffect(() => {
+    if (username) {
+      socket.auth = { username: username, publicKey: PUBLIC_KEY };
+      socket.connect();
+
+      socket.on("on_message", (data) => {
+        handleNewMessage(data);
+      });
+
+      socket.on("online_users", (users) => {
+        setOnlineUser(users?.filter((user) => user?.username !== username));
+      });
     }
-    setMessage(updatedMessage);
-  }
+
+    return () => {
+      socket.removeAllListeners();
+      socket.disconnect();
+    };
+  }, [username]);
 
   return (
     <div className="container">
