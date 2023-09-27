@@ -34,7 +34,7 @@ function initSocketListeners(socket) {
       message,
       from: socket?.id,
       username: username,
-      publicKey
+      publicKey,
     });
   });
 

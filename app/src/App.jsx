@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import "./App.css";
 import { io } from "socket.io-client";
 import DiffiHellmanAlgo from "./EncryptDecrypt/diffieHellman";
@@ -9,7 +9,6 @@ const socket = io("ws://localhost:3001", { autoConnect: false });
 const PRIVATE_KEY = secret();
 const PUBLIC_KEY = DiffiHellmanAlgo(PRIVATE_KEY);
 let SHARED_KEY;
-console.log(PUBLIC_KEY, PRIVATE_KEY);
 
 function App() {
   const [message, setMessage] = useState([]);
@@ -61,7 +60,7 @@ function App() {
       const messageHistoryIndex = message?.findIndex(
         (user) => user?.from === data?.from
       );
-      console.log(messageHistoryIndex, message, data);
+
       if (messageHistoryIndex > -1) {
         updatedMessage[messageHistoryIndex].message.push(decryptedMessage);
       } else {
@@ -77,10 +76,6 @@ function App() {
       socket.auth = { username: username, publicKey: PUBLIC_KEY };
       socket.connect();
 
-      socket.on("on_message", (data) => {
-        handleNewMessage(data);
-      });
-
       socket.on("online_users", (users) => {
         setOnlineUser(users?.filter((user) => user?.username !== username));
       });
@@ -91,6 +86,24 @@ function App() {
       socket.disconnect();
     };
   }, [username]);
+
+  useEffect(() => {
+    if (username) {
+      socket.on("on_message", (data) => {
+        handleNewMessage(data);
+      });
+    }
+
+    return () => socket.removeAllListeners("on_message");
+  }, [username, handleNewMessage]);
+
+  const recipientConversations = useMemo(() => {
+    const conversations = message?.find((msg) => msg?.from === recipient?.id);
+    if (conversations) {
+      return conversations?.message;
+    }
+    return [];
+  }, [recipient, message]);
 
   return (
     <div className="container">
@@ -131,17 +144,15 @@ function App() {
       <div className="message-container">
         <div>Conversation</div>
         <div className="messages">
-          {recipient?.id &&
-            message
-              ?.filter((msg) => msg?.from === recipient?.id)
-              ?.map((msg, index) => {
+          {recipientConversations?.length
+            ? recipientConversations?.map((msg, index) => {
                 return (
                   <div className="message-info" key={index}>
-                    <div className="message">{msg?.message}</div>
-                    <div className="username">{msg?.username}</div>
+                    <div className="message">{msg}</div>
                   </div>
                 );
-              })}
+              })
+            : null}
         </div>
         <div className="input-message">
           <input

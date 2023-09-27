@@ -59,6 +59,10 @@
   flex-grow: 1;
 }
 
+.message-info .message {
+  text-align: right;
+}
+
 .message-container .input-message {
   display: flex;
   place-items: center;
