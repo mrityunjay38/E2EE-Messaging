@@ -1,16 +1,14 @@
-const { subtle } = window.crypto;
+import AES from "crypto-js/aes";
 
-async function encrypt(message, publicKey) {
-    console.log(publicKey);
-  const payload = message;
-  const text = new TextEncoder();
-  const encryptedData = await window.crypto.subtle.encrypt(
-    { name: "RSA-OAEP" },
-    publicKey,
-    text.encode(payload)
-  );
-
-  return Promise.resolve(encryptedData);
-}
+const encrypt = (message, key) => {
+  return Promise((resolve, reject) => {
+    try {
+      const encryptedMessage = AES.encrypt(message, key?.toString()).toString();
+      resolve(encryptedMessage);
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
 
 export default encrypt;

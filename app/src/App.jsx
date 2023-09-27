@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import "./App.css";
-import generateKey from "./GenerateKey/ecdsa";
 import { io } from "socket.io-client";
+import DiffiHellmanAlgo from "./EncryptDecrypt/diffieHellman";
+import { secret } from "./EncryptDecrypt/utils";
 const socket = io("ws://localhost:3001", { autoConnect: false });
-let publicKey, privateKey;
+const privateKey = secret();
+const publicKey = DiffiHellmanAlgo(privateKey);
+console.log(publicKey, privateKey);
 
 function App() {
-  const inputRef = useRef();
   const [message, setMessage] = useState([]);
   const [username, setUserName] = useState("");
   const [onlineUser, setOnlineUser] = useState([]);
@@ -20,7 +22,7 @@ function App() {
 
   useEffect(() => {
     if (username) {
-      socket.auth = { username: username };
+      socket.auth = { username: username, publicKey };
       socket.connect();
 
       socket.on("on_message", (data) => {
@@ -35,16 +37,16 @@ function App() {
     return () => socket.disconnect();
   }, [username]);
 
-  useEffect(() => {
-    if (username) {
-      generateKey()
-        .then((keyPair) => {
-          publicKey = keyPair?.publicKey;
-          privateKey = keyPair?.privateKey;
-        })
-        .catch((err) => err);
-    }
-  }, [username]);
+  // useEffect(() => {
+  //   if (username) {
+  //     generateKey()
+  //       .then((keyPair) => {
+  //         publicKey = keyPair?.publicKey;
+  //         privateKey = keyPair?.privateKey;
+  //       })
+  //       .catch((err) => err);
+  //   }
+  // }, [username]);
 
   const handleSendMessage = useCallback(
     ({ key, target }) => {
@@ -52,7 +54,8 @@ function App() {
         socket.emit("to_user", {
           message: target?.value,
           to: recipient?.id,
-          username: recipient?.username,
+          username,
+          publicKey,
         });
         setInputMessage("");
       }
@@ -61,9 +64,9 @@ function App() {
   );
 
   const handleRecipientChange = useCallback(
-    ({ id, username }) =>
+    ({ id, username, publicKey }) =>
       (event) => {
-        setRecipient({ id, username });
+        setRecipient({ id, username, publicKey });
       },
     [onlineUser]
   );
@@ -108,6 +111,7 @@ function App() {
               onClick={handleRecipientChange({
                 id: msg?.from,
                 username: msg?.username,
+                publicKey: msg?.publicKey,
               })}
               key={msg?.from}
             >
