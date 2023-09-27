@@ -4,8 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "startt": "clear && nodemon server.js",
-    "start": "for processId in `lsof -ti:3001`; do kill -9 $processId; done && nodemon server.js"
+    "start": "for processId in `lsof -ti:3001`; do kill -9 $processId; done && clear && nodemon server.js"
   },
   "author": "Mrityunjay",
   "license": "ISC",

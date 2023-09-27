@@ -1,17 +1,17 @@
-const { subtle } = window.crypto;
+import { enc } from "crypto-js";
+import AES from "crypto-js/aes";
 
-async function decrypt(message, privateKey) {
-  console.log(privateKey);
-  const decryptedData = await window.crypto.subtle.decrypt(
-    { name: "RSA-OAEP" },
-    privateKey,
-    message
-  );
-
-  const text = new TextDecoder();
-  const payload = text.decode(decryptedData);
-
-  return Promise.resolve(payload);
-}
+const decrypt = (message, key) => {
+  return Promise((resolve, reject) => {
+    try {
+      const decryptedMessage = AES.decrypt(message, key?.toString()).toString(
+        enc.Utf8
+      );
+      resolve(decryptedMessage);
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
 
 export default decrypt;

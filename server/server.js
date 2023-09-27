@@ -20,7 +20,8 @@ app.use(cors());
 
 io.on("connection", (socket) => {
   const username = socket?.handshake?.auth?.username;
-  const userInfo = { username, id: socket?.id };
+  const publicKey = socket?.handshake?.auth?.publicKey;
+  const userInfo = { username, id: socket?.id, publicKey };
   onlineUsers.push(userInfo);
   io.sockets.emit("online_users", onlineUsers);
 
@@ -28,11 +29,12 @@ io.on("connection", (socket) => {
 });
 
 function initSocketListeners(socket) {
-  socket.on("to_user", ({ message, to, username }) => {
+  socket.on("to_user", ({ message, to, username, publicKey }) => {
     socket.to(to).emit("on_message", {
       message,
       from: socket?.id,
       username: username,
+      publicKey
     });
   });
 
