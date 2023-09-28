@@ -4,22 +4,33 @@
   max-width: 80%;
   height: 80vh;
   max-height: 80vh;
-  border: 1px solid #d9d9d9;
-  border-radius: 3px;
   margin: 1em auto;
   overflow: hidden;
+  background: #222e35;
+  color: #ffffff90;
+  border-radius: 3px;
+  border: 1px solid #222e35;
+  box-shadow: 0 17px 50px 0 rgba(11, 20, 26, 0.19),
+    0 12px 15px 0 rgba(11, 20, 26, 0.24);
+}
+
+.container > div {
+  background: #111b21;
+}
+
+.container .col-header {
+  background: #202c33;
 }
 
 .online-users {
   display: flex;
   flex-direction: column;
   min-width: 10em;
-  border-right: 1px solid #d9d9d9;
+  border-right: 1px solid #d9d9d926;
 }
 
 .online-users > div {
   padding: 0.5em;
-  padding-bottom: 0;
   display: flex;
   place-items: center;
 }
@@ -36,12 +47,11 @@
   display: flex;
   flex-direction: column;
   min-width: 15em;
-  border-right: 1px solid #d9d9d9;
+  border-right: 1px solid #d9d9d926;
 }
 
 .message-list > div {
   padding: 0.5em;
-  padding-bottom: 0;
 }
 
 .message-container {
@@ -52,7 +62,6 @@
 
 .message-container > div {
   padding: 0.5em;
-  padding-bottom: 0;
 }
 
 .message-container .messages {
@@ -71,4 +80,8 @@
 .message-container .input-message input {
   width: 100%;
   height: 3em;
+  background: #2a3942;
+  border: 0;
+  border-radius: 5px;
+  padding: 5px 10px;
 }

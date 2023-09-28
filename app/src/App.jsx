@@ -113,7 +113,7 @@ function App() {
   return (
     <div className="container">
       <div className="online-users">
-        <div>Online Users</div>
+        <div className="col-header">Online Users</div>
         {!onlineUser?.length && (
           <div style={{ margin: "1em auto" }}>Room is empty</div>
         )}
@@ -127,7 +127,7 @@ function App() {
         })}
       </div>
       <div className="message-list">
-        <div>Messages</div>
+        <div className="col-header">Messages</div>
         {!message?.length && (
           <div style={{ margin: "1em auto" }}>No Message</div>
         )}
@@ -147,7 +147,7 @@ function App() {
         })}
       </div>
       <div className="message-container">
-        <div>Conversation</div>
+        <div className="col-header">Conversation</div>
         <div className="messages">
           {recipientConversations?.length
             ? recipientConversations?.map((msg, index) => {
