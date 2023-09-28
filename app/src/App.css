@@ -33,6 +33,7 @@
   padding: 0.5em;
   display: flex;
   place-items: center;
+  cursor: pointer;
 }
 
 .online-users .online-icon {
@@ -40,6 +41,11 @@
   height: 5px;
   background: lightgreen;
   border-radius: 10px;
+  margin-right: 10px;
+}
+
+.default-thumbnail {
+  height: 25px;
   margin-right: 10px;
 }
 
@@ -52,6 +58,9 @@
 
 .message-list > div {
   padding: 0.5em;
+  display: flex;
+  place-items: center;
+  cursor: pointer;
 }
 
 .message-container {
