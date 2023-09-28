@@ -5,6 +5,8 @@ import DiffiHellmanAlgo from "./EncryptDecrypt/diffieHellman";
 import { secret } from "./EncryptDecrypt/utils";
 import encrypt from "./EncryptDecrypt/encrypt";
 import decrypt from "./EncryptDecrypt/decrypt";
+import DefaultThumbnail from "./assets/default-thumbnail.png";
+
 const socket = io("ws://localhost:3001", { autoConnect: false });
 const PRIVATE_KEY = secret();
 const PUBLIC_KEY = DiffiHellmanAlgo(PRIVATE_KEY);
@@ -121,6 +123,11 @@ function App() {
           return (
             <div onClick={handleRecipientChange(user)} key={user?.id}>
               <span className="online-icon" />
+              <img
+                src={DefaultThumbnail}
+                className="default-thumbnail"
+                alt="default-thumbnail"
+              />
               <span>{user?.username}</span>
             </div>
           );
@@ -141,7 +148,12 @@ function App() {
               })}
               key={msg?.from}
             >
-              {msg?.username}
+              <img
+                src={DefaultThumbnail}
+                className="default-thumbnail"
+                alt="default-thumbnail"
+              />
+              <span>{msg?.username}</span>
             </div>
           );
         })}
