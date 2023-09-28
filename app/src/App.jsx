@@ -79,13 +79,18 @@ function App() {
       socket.on("online_users", (users) => {
         setOnlineUser(users?.filter((user) => user?.username !== username));
       });
+
+      socket.on("connect_error", (err) => closeConnection());
+      socket.on("connect_failed", (err) => closeConnection());
     }
 
-    return () => {
-      socket.removeAllListeners();
-      socket.disconnect();
-    };
+    return () => closeConnection();
   }, [username]);
+
+  function closeConnection() {
+    socket.removeAllListeners();
+    socket.disconnect();
+  }
 
   useEffect(() => {
     if (username) {
