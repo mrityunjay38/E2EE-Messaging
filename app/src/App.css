@@ -88,10 +88,42 @@
 
 .message-container .messages {
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
+.message-container .messages > .message-info:not(:last-child) {
+  margin-bottom: 10px;
+}
+
+.message-info {
+  position: relative;
 }
 
 .message-info .message {
-  text-align: right;
+  max-width: 35%;
+  float: right;
+  padding: 4px 8px;
+  background: #005c4b;
+  color: white;
+  margin-right: 10px;
+  border-radius: 6px;
+  border-top-right-radius: 0;
+
+  text-align: left;
+}
+
+.message-info .tail {
+  width: 0px;
+  height: 0px;
+  position: absolute;
+  top: 0;
+  right: 0px;
+  border: 5px solid #005c4b;
+  border-bottom: 5px solid transparent;
+  border-right: 5px solid transparent;
 }
 
 .message-container .input-message {
