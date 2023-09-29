@@ -67,6 +67,19 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  position: relative;
+  z-index: 0;
+}
+
+.conversation-bg {
+  background: url("./assets/bg-chat.png") repeat;
+  background-color: #111b21;
+  background-size: 420px 760px;
+  opacity: 0.06;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
 
 .message-container > div {

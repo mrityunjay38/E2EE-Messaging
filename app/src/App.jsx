@@ -159,6 +159,7 @@ function App() {
         })}
       </div>
       <div className="message-container">
+        <div className="conversation-bg" />
         <div className="col-header">Conversation</div>
         <div className="messages">
           {recipientConversations?.length
