@@ -166,7 +166,8 @@ function App() {
             ? recipientConversations?.map((msg, index) => {
                 return (
                   <div className="message-info" key={index}>
-                    <div className="message">{msg}</div>
+                    <span className="message">{msg}</span>
+                    <span className="tail"></span>
                   </div>
                 );
               })
