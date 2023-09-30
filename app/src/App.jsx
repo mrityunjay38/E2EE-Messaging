@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import "./App.css";
 import { io } from "socket.io-client";
 import DiffiHellmanAlgo from "./EncryptDecrypt/diffieHellman";
@@ -19,6 +25,15 @@ function App() {
   const [recipient, setRecipient] = useState(null);
   const [inputMessage, setInputMessage] = useState("");
   const [logs, setLogs] = useState([]);
+  const logsRef = useRef(null);
+
+  useEffect(() => {
+    if (logsRef?.current?.lastElementChild) {
+      logsRef?.current?.lastElementChild?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  }, [logs]);
 
   useEffect(() => {
     const newUser = prompt("Type username...");
@@ -208,7 +223,7 @@ function App() {
         </div>
       </div>
 
-      <div className="logs">
+      <div className="logs" ref={logsRef}>
         {logs?.length ? logs?.map((log) => <div>{log}</div>) : "No logs..."}
       </div>
     </React.Fragment>
