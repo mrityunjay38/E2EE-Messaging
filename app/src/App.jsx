@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import "./App.css";
 import { io } from "socket.io-client";
 import DiffiHellmanAlgo from "./EncryptDecrypt/diffieHellman";
@@ -18,6 +18,7 @@ function App() {
   const [onlineUser, setOnlineUser] = useState([]);
   const [recipient, setRecipient] = useState(null);
   const [inputMessage, setInputMessage] = useState("");
+  const [logs, setLogs] = useState([]);
 
   useEffect(() => {
     const newUser = prompt("Type username...");
@@ -41,6 +42,10 @@ function App() {
           username,
           localCache: true,
         });
+        setLogs((prev) => [
+          ...prev,
+          `> Sent: ${encryptedMessage} to ${recipient?.username}`,
+        ]);
       }
     },
     [recipient, socket, messageStore]
@@ -50,6 +55,7 @@ function App() {
     ({ id, username, publicKey }) =>
       (event) => {
         setRecipient({ id, username, publicKey });
+        setLogs((prev) => [...prev, `> Recipient: ${username}`]);
         try {
           SHARED_KEY = DiffiHellmanAlgo(publicKey, PRIVATE_KEY);
         } catch (err) {
@@ -76,6 +82,10 @@ function App() {
         ];
       }
       setMessageStore(updatedMessageStore);
+      setLogs((prev) => [
+        ...prev,
+        `> Received: ${data?.message} from ${data?.username}`,
+      ]);
     },
     [messageStore]
   );
@@ -95,21 +105,30 @@ function App() {
     if (username) {
       socket.auth = { username: username, publicKey: PUBLIC_KEY };
       socket.connect();
+      setLogs((prev) => [
+        ...prev,
+        `> Socket connected: Public_Key of ${username} is ${PUBLIC_KEY}`,
+      ]);
 
       socket.on("online_users", (users) => {
         setOnlineUser(users?.filter((user) => user?.username !== username));
+        setLogs((prev) => [
+          ...prev,
+          `> Online users: ${users?.map((user) => user?.username)?.join(", ")}`,
+        ]);
       });
 
-      socket.on("connect_error", (err) => closeConnection());
-      socket.on("connect_failed", (err) => closeConnection());
+      socket.on("connect_error", (err) => closeConnection(err));
+      socket.on("connect_failed", (err) => closeConnection(err));
     }
 
     return () => closeConnection();
   }, [username]);
 
-  function closeConnection() {
+  function closeConnection(err) {
     socket.removeAllListeners();
     socket.disconnect();
+    setLogs((prev) => [...prev, "> Socket disconnected"]);
   }
 
   useEffect(() => {
@@ -131,60 +150,68 @@ function App() {
   }, [recipient, messageStore]);
 
   return (
-    <div className="container">
-      <div className="online-users">
-        <div className="col-header">Online Users</div>
-        {!onlineUser?.length && (
-          <div style={{ margin: "1em auto" }}>Room is empty</div>
-        )}
-        {onlineUser?.map((user) => {
-          return (
-            <div onClick={handleRecipientChange(user)} key={user?.id}>
-              <span className="online-icon" />
-              <img
-                src={DefaultThumbnail}
-                className="default-thumbnail"
-                alt="default-thumbnail"
-              />
-              <span>{user?.username}</span>
-            </div>
-          );
-        })}
+    <React.Fragment>
+      <div className="container">
+        <div className="online-users">
+          <div className="col-header">Online Users</div>
+          {!onlineUser?.length && (
+            <div style={{ margin: "1em auto" }}>Room is empty</div>
+          )}
+          {onlineUser?.map((user) => {
+            return (
+              <div onClick={handleRecipientChange(user)} key={user?.id}>
+                <span className="online-icon" />
+                <img
+                  src={DefaultThumbnail}
+                  className="default-thumbnail"
+                  alt="default-thumbnail"
+                />
+                <span>{user?.username}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="message-container">
+          <div className="conversation-bg" />
+          <div className="col-header">Conversation</div>
+          <div className="messages">
+            {recipientConversations?.length
+              ? recipientConversations?.map((data, index) => {
+                  return (
+                    <div className="message-info" key={index}>
+                      <span
+                        className={`message${
+                          data?.localCache ? " right" : " left"
+                        }`}
+                      >
+                        {data?.message}
+                      </span>
+                      <span
+                        className={`tail${
+                          data?.localCache ? " right" : " left"
+                        }`}
+                      />
+                    </div>
+                  );
+                })
+              : null}
+          </div>
+          <div className="input-message">
+            <input
+              value={inputMessage}
+              placeholder="Type something...."
+              onKeyDown={handleSendMessage}
+              onChange={({ target }) => setInputMessage(target?.value)}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="message-container">
-        <div className="conversation-bg" />
-        <div className="col-header">Conversation</div>
-        <div className="messages">
-          {recipientConversations?.length
-            ? recipientConversations?.map((data, index) => {
-                return (
-                  <div className="message-info" key={index}>
-                    <span
-                      className={`message${
-                        data?.localCache ? " right" : " left"
-                      }`}
-                    >
-                      {data?.message}
-                    </span>
-                    <span
-                      className={`tail${data?.localCache ? " right" : " left"}`}
-                    />
-                  </div>
-                );
-              })
-            : null}
-        </div>
-        <div className="input-message">
-          <input
-            value={inputMessage}
-            placeholder="Type something...."
-            onKeyDown={handleSendMessage}
-            onChange={({ target }) => setInputMessage(target?.value)}
-          />
-        </div>
+      <div className="logs">
+        {logs?.length ? logs?.map((log) => <div>{log}</div>) : "No logs..."}
       </div>
-    </div>
+    </React.Fragment>
   );
 }
 
