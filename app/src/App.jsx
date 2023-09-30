@@ -13,7 +13,7 @@ const PUBLIC_KEY = DiffiHellmanAlgo(PRIVATE_KEY);
 let SHARED_KEY;
 
 function App() {
-  const [message, setMessage] = useState([]);
+  const [messageStore, setMessageStore] = useState({});
   const [username, setUserName] = useState("");
   const [onlineUser, setOnlineUser] = useState([]);
   const [recipient, setRecipient] = useState(null);
@@ -35,9 +35,15 @@ function App() {
           publicKey: PUBLIC_KEY,
         });
         setInputMessage("");
+        localMessageCache({
+          message: target?.value,
+          to: recipient?.id,
+          username,
+          localCache: true,
+        });
       }
     },
-    [recipient, socket]
+    [recipient, socket, messageStore]
   );
 
   const handleRecipientChange = useCallback(
@@ -57,21 +63,33 @@ function App() {
     async (data) => {
       SHARED_KEY = DiffiHellmanAlgo(data?.publicKey, PRIVATE_KEY);
       const decryptedMessage = await decrypt(data?.message, SHARED_KEY);
+      const updatedMessageStore = { ...messageStore };
 
-      const updatedMessage = [...message];
-      const messageHistoryIndex = message?.findIndex(
-        (user) => user?.from === data?.from
-      );
-
-      if (messageHistoryIndex > -1) {
-        updatedMessage[messageHistoryIndex].message.push(decryptedMessage);
+      if (updatedMessageStore[data?.from]) {
+        updatedMessageStore[data.from].push({
+          ...data,
+          message: decryptedMessage,
+        });
       } else {
-        updatedMessage.push({ ...data, message: [decryptedMessage] });
+        updatedMessageStore[data?.from] = [
+          { ...data, message: decryptedMessage },
+        ];
       }
-      setMessage(updatedMessage);
+      setMessageStore(updatedMessageStore);
     },
-    [message]
+    [messageStore]
   );
+
+  function localMessageCache(data) {
+    const updatedMessageStore = { ...messageStore };
+
+    if (updatedMessageStore[data?.to]) {
+      updatedMessageStore[data.to].push({ ...data });
+    } else {
+      updatedMessageStore[data?.to] = [{ ...data }];
+    }
+    setMessageStore(updatedMessageStore);
+  }
 
   useEffect(() => {
     if (username) {
@@ -105,12 +123,12 @@ function App() {
   }, [username, handleNewMessage]);
 
   const recipientConversations = useMemo(() => {
-    const conversations = message?.find((msg) => msg?.from === recipient?.id);
-    if (conversations) {
-      return conversations?.message;
+    const conversations = messageStore[recipient?.id];
+    if (conversations?.length) {
+      return conversations;
     }
     return [];
-  }, [recipient, message]);
+  }, [recipient, messageStore]);
 
   return (
     <div className="container">
@@ -133,41 +151,25 @@ function App() {
           );
         })}
       </div>
-      <div className="message-list">
-        <div className="col-header">Messages</div>
-        {!message?.length && (
-          <div style={{ margin: "1em auto" }}>No Message</div>
-        )}
-        {message?.map((msg) => {
-          return (
-            <div
-              onClick={handleRecipientChange({
-                id: msg?.from,
-                username: msg?.username,
-                publicKey: msg?.publicKey,
-              })}
-              key={msg?.from}
-            >
-              <img
-                src={DefaultThumbnail}
-                className="default-thumbnail"
-                alt="default-thumbnail"
-              />
-              <span>{msg?.username}</span>
-            </div>
-          );
-        })}
-      </div>
+
       <div className="message-container">
         <div className="conversation-bg" />
         <div className="col-header">Conversation</div>
         <div className="messages">
           {recipientConversations?.length
-            ? recipientConversations?.map((msg, index) => {
+            ? recipientConversations?.map((data, index) => {
                 return (
                   <div className="message-info" key={index}>
-                    <span className="message">{msg}</span>
-                    <span className="tail"></span>
+                    <span
+                      className={`message${
+                        data?.localCache ? " right" : " left"
+                      }`}
+                    >
+                      {data?.message}
+                    </span>
+                    <span
+                      className={`tail${data?.localCache ? " right" : " left"}`}
+                    />
                   </div>
                 );
               })
