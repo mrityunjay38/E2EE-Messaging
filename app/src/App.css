@@ -2,8 +2,8 @@
 .container {
   display: flex;
   max-width: 80%;
-  height: 80vh;
-  max-height: 80vh;
+  height: 75vh;
+  max-height: 75vh;
   margin: 1em auto;
   overflow: hidden;
   background: #222e35;
@@ -143,4 +143,24 @@
   border: 0;
   border-radius: 5px;
   padding: 5px 10px;
+}
+
+.logs {
+  display: flex;
+  flex-direction: column;
+  max-width: 79%;
+  height: 15vh;
+  max-height: 15vh;
+  margin: 1em auto;
+  margin-bottom: 0;
+  padding: 0.5em;
+  overflow: hidden;
+  overflow-y: scroll;
+  background: #222e35;
+  color: #ffffff90;
+  font-size: 0.9em;
+  border-radius: 3px;
+  border: 1px solid #222e35;
+  box-shadow: 0 17px 50px 0 rgba(11, 20, 26, 0.19),
+    0 12px 15px 0 rgba(11, 20, 26, 0.24);
 }
