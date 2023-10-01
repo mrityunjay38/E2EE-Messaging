@@ -59,7 +59,7 @@ function App() {
         });
         setLogs((prev) => [
           ...prev,
-          `> Sent: ${encryptedMessage} to ${recipient?.username}`,
+          `Sent: ${encryptedMessage} to ${recipient?.username}`,
         ]);
       }
     },
@@ -70,7 +70,7 @@ function App() {
     ({ id, username, publicKey }) =>
       (event) => {
         setRecipient({ id, username, publicKey });
-        setLogs((prev) => [...prev, `> Recipient: ${username}`]);
+        setLogs((prev) => [...prev, `Recipient: ${username}`]);
         try {
           SHARED_KEY = DiffiHellmanAlgo(publicKey, PRIVATE_KEY);
         } catch (err) {
@@ -99,7 +99,7 @@ function App() {
       setMessageStore(updatedMessageStore);
       setLogs((prev) => [
         ...prev,
-        `> Received: ${data?.message} from ${data?.username}`,
+        `Received: ${data?.message} from ${data?.username}`,
       ]);
     },
     [messageStore]
@@ -122,14 +122,14 @@ function App() {
       socket.connect();
       setLogs((prev) => [
         ...prev,
-        `> Socket connected: Public_Key of ${username} is ${PUBLIC_KEY}`,
+        `Socket connected: Public_Key of ${username} is ${PUBLIC_KEY}`,
       ]);
 
       socket.on("online_users", (users) => {
         setOnlineUser(users?.filter((user) => user?.username !== username));
         setLogs((prev) => [
           ...prev,
-          `> Online users: ${users?.map((user) => user?.username)?.join(", ")}`,
+          `Online users: ${users?.map((user) => user?.username)?.join(", ")}`,
         ]);
       });
 
@@ -143,7 +143,7 @@ function App() {
   function closeConnection(err) {
     socket.removeAllListeners();
     socket.disconnect();
-    setLogs((prev) => [...prev, "> Socket disconnected"]);
+    setLogs((prev) => [...prev, "Socket disconnected"]);
   }
 
   useEffect(() => {
@@ -224,7 +224,9 @@ function App() {
       </div>
 
       <div className="logs" ref={logsRef}>
-        {logs?.length ? logs?.map((log) => <div>{log}</div>) : "No logs..."}
+        {logs?.length
+          ? logs?.map((log) => <div>{`> ${log}`}</div>)
+          : "No logs..."}
       </div>
     </React.Fragment>
   );
