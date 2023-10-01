@@ -1,6 +1,6 @@
 # E2EE-Messaging
 
-# A Simple app to learn and demonstrate encrypted messaing using Diffie-Hellman
+## A Simple app to learn and demonstrate encrypted messaing using Diffie-Hellman
 
 ![E2EE Messaing](https://raw.githubusercontent.com/mrityunjay38/E2EE-Messaging/development/DiffieHellman-e2ee-message-demo.gif)
 
