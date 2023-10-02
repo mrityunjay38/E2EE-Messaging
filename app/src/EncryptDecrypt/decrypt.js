@@ -2,7 +2,6 @@ import { enc } from "crypto-js";
 import AES from "crypto-js/aes";
 
 const decrypt = (message, key) => {
-  console.log(key);
   return new Promise((resolve, reject) => {
     try {
       const decryptedMessage = AES.decrypt(message, key?.toString()).toString(
